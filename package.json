@@ -1,0 +1,35 @@
+{
+  "name": "Battleships",
+  "version": "0.5.0",
+  "description": "COMP 361 Projet",
+  "main": "./",
+  "dependencies": {
+    "clone": "",
+    "react": "",
+    "underscore": ""
+  },
+  "devDependencies": {
+    "grunt": "",
+    "mongoose": "",
+    "grunt-browserify": "",
+    "grunt-contrib-watch": "",
+    "rsvp": "",
+    "reactify": "",
+    "connect-livereload": "",
+    "grunt-contrib-connect": "",
+    "grunt-open": ""
+  },
+  "author": {
+    "name": "Maude, Emilie, Angela, Calem and Ben",
+    "email": "benjamin.sansouci@gmail.com",
+    "url": "http://github.com/bsansouci"
+  },
+  "engines": {
+    "node": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bsansouci/react-shipwars.git"
+  },
+  "license": "MIT"
+}
