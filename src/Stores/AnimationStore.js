@@ -233,7 +233,6 @@ var AnimationStore = merge(EventEmitter.prototype, {
   },
 
   delete: function(anim) {
-    console.log(anim)
     if(frames.head) {
       var tmp = frames.head;
       var prev = null;
@@ -250,6 +249,7 @@ var AnimationStore = merge(EventEmitter.prototype, {
           }
           break;
         }
+        prev = tmp;
         tmp = tmp.next;
       }
     }
