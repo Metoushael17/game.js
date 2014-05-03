@@ -52,7 +52,7 @@ var enemy = {
   dodgeSpeed: 800,
   dodgeStamina: 20,
   staminaIncrease: 4000,
-  equippedWeapon: sword
+  equippedWeapon: hands
 }
 
 var player = {
