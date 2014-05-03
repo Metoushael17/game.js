@@ -85,7 +85,10 @@ var View = React.createClass({
     document.addEventListener("mousemove", this._onMouseMove);
 
     ObjectActions.start(this.state.player, this.state.enemy);
-    MessageActions.sendMessage("Keybindings:\n enter: attack \n space: block \n shift: doge");
+    MessageActions.sendMessage("Keybindings: ");
+    MessageActions.sendMessage("enter: attack");
+    MessageActions.sendMessage("space: block");
+    MessageActions.sendMessage("shift: doge");
   },
 
   // equal: function(obj1, obj2) {
@@ -120,9 +123,19 @@ var View = React.createClass({
         Equipped Weapon: {player.equippedWeapon.name} <br />
         Damage: {player.equippedWeapon.damage} <br />
         </div>
+        <div style={{
+          width: player.size.width,
+          height: player.size.height,
+          overflow: "hidden",
+          position: "absolute"
+        }} >
+          <img src={player.animations[player.state]} style={{
+            position: "absolute",
+            left: -(~~player.animations.frame) * player.size.width
+          }} />
+        </div>
         <br />
         <div className="player" style={styleBox}>
-
         Next attack: {~~(enemy.nextAttackTime / 1000)} <br />
         <div className="circleBase" style={{
             width: enemy.currentAnimationTime / 50,

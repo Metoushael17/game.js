@@ -26,7 +26,7 @@ var Message = React.createClass({
   },
 
   render: function() {
-    var messages = this.state.messages.slice(Math.max(this.state.messages.length - 6, 0), this.state.messages.length);
+    var messages = this.state.messages.slice(Math.max(this.state.messages.length - 10, 0), this.state.messages.length);
     var loaderStyle = {
       display: messages.length > 0 ? "block" : "none",
     };
@@ -35,7 +35,7 @@ var Message = React.createClass({
       return <div
         key={"message_" + i}
         className="message"
-        style={{opacity:(i + 1)/messages.length}}>
+        style={{opacity:(i + 3)/messages.length}}>
         {m.message}
       </div>;
     });

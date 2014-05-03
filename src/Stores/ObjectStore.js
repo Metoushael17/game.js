@@ -67,8 +67,29 @@ var player = {
   dodgeSpeed: 800,
   dodgeStamina: 60,
   staminaIncrease: 4000,
-  equippedWeapon: dagger
+  equippedWeapon: dagger,
+  animations: {
+    frame: 0,
+    idle: "./resources/animation/idle.jpg"
+  },
+  size: {
+    width: 136,
+    height: 144
+  }
 }
+
+function idle() {
+  var anim = AnimationStore.createAnimation({frame: 0}, {frame: 3}, player.animations, 4000, idle);
+  AnimationStore.playAnimation(anim);
+}
+
+idle();
+
+// var test = AnimationStore.createAnimatedObject(0, 1000);
+
+// test.toValue = 10;
+// console.log(test);
+
 
 var timer = {
   t: 0

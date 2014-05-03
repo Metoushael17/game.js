@@ -178,8 +178,48 @@ function _addAnimation(anim) {
   }
 }
 
+function setFrames(obj, speedOfAnimation, callback) {
+  var found = false;
+  var availableParams = [];
+
+  var coef = ~~(speedOfAnimation * fps / 1000);
+  var increment = (obj.toValue - obj.curVal) / coef;
+  var frames = new Array(coef);
+
+  for (var i = 0; i < coef; i++) {
+    var newObj = {
+      curValue: obj.toValue - increment * i
+    };
+
+    frames[i] = newObj;
+  }
+
+  return frames;
+}
+
+function _createAnimatedObject(val, speed, callback){
+  var toValue = 0;
+
+  var obj = {
+    curVal: val,
+    frames: []
+  };
+
+  Object.defineProperty(obj, "toValue", {
+    get: function() {
+      return toValue;
+    },
+    set: function(y) {
+      toValue = y;
+      obj.frames = setFrames(obj, speed, callback);
+    }
+  })
+  return obj;
+}
+
 var AnimationStore = merge(EventEmitter.prototype, {
   createAnimation: _createAnimation,
+  createAnimatedObject: _createAnimatedObject,
   playAnimation: _addAnimation,
   start: function() {
     if(!pause) {
