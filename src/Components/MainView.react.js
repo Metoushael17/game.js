@@ -127,7 +127,9 @@ var View = React.createClass({
           width: player.size.width,
           height: player.size.height,
           overflow: "hidden",
-          position: "absolute"
+          position: "absolute",
+          left: 400,
+          top: 0
         }} >
           <img src={player.animations[player.state]} style={{
             position: "absolute",
