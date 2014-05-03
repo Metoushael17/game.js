@@ -49,8 +49,8 @@ var enemy = {
   alliance: "enemy",
   stamina: 100,
   maxStamina: 100,
-  dodgeSpeed: 2000,
-  dodgeStamina: 60,
+  dodgeSpeed: 800,
+  dodgeStamina: 20,
   staminaIncrease: 4000,
   equippedWeapon: sword
 }
@@ -64,8 +64,8 @@ var player = {
   alliance: "ally",
   stamina: 100,
   maxStamina: 100,
-  dodgeSpeed: 800,
-  dodgeStamina: 60,
+  dodgeSpeed: 500,
+  dodgeStamina: 20,
   staminaIncrease: 4000,
   equippedWeapon: dagger,
   animations: {
