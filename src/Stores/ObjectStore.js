@@ -46,6 +46,7 @@ var enemy = {
   health: 100,
   maxHealth: 100,
   state: "idle",
+  alliance: "enemy",
   stamina: 100,
   maxStamina: 100,
   dodgeSpeed: 2000,
@@ -60,9 +61,10 @@ var player = {
   health: 100,
   maxHealth: 100,
   state: "idle",
+  alliance: "ally",
   stamina: 100,
   maxStamina: 100,
-  dodgeSpeed: 2000,
+  dodgeSpeed: 800,
   dodgeStamina: 60,
   staminaIncrease: 4000,
   equippedWeapon: dagger
@@ -92,12 +94,16 @@ function rand(min, max) {
 
 function attack(attacker, attacked) {
   if(attacker.stamina < attacker.equippedWeapon.staminaDamage) {
-    console.log("attacker: Can't attack because not enough stamina");
+    if(attacker.alliance === "ally") {
+      MessageActions.sendMessage("attacker: Can't attack because not enough stamina");
+    }
     return true;
   }
 
   if(attacker.state !== "idle" && attacker.state !== "blocking") {
-    console.log("Can't attack because you're currently", player.state);
+    if(attacker.alliance === "ally") {
+      MessageActions.sendMessage("Can't attack because you're currently", player.state);
+    }
     return true;
   }
 
@@ -119,17 +125,24 @@ function attack(attacker, attacked) {
         }
       }
       staminaStartIncrease(attacked);
-      console.log("blocked");
+
+      if(attacker.alliance === "ally") {
+        MessageActions.sendMessage("blocked");
+      }
       return;
     }
 
     if(attacked.state === "dodging") {
-      console.log("dodging");
+      if(attacker.alliance === "ally") {
+        MessageActions.sendMessage("dodged");
+      }
       return;
     }
 
     if(attacked.state === "dead") {
-      console.log("enemy is already dead");
+      if(attacker.alliance === "ally") {
+        MessageActions.sendMessage("enemy is already dead");
+      }
       return;
     }
 
@@ -229,11 +242,15 @@ AppDispatcher.register(function(payload) {
         break;
       case 'PLAYER_DODGE':
         if(data.state !== "idle" && data.state !== "blocking") {
-          console.log("Can't dodge because you're currently", player.state);
+          if(data.alliance === "ally") {
+            MessageActions.sendMessage("Can't dodge because you're currently", player.state);
+          }
           return true;
         }
         if(data.stamina < data.dodgeStamina) {
-          console.log("Can't dodge, not enough stamina");
+          if(data.alliance === "ally") {
+            MessageActions.sendMessage("Can't dodge, not enough stamina");
+          }
           return;
         }
 
@@ -242,7 +259,9 @@ AppDispatcher.register(function(payload) {
 
         staminaStartIncrease(data);
 
-        console.log("Dodging...");
+        if(data.alliance === "ally") {
+          MessageActions.sendMessage("Dodging...");
+        }
 
         var anim = AnimationStore.createAnimation({currentAnimationTime: data.dodgeSpeed}, {currentAnimationTime: 0}, data, data.dodgeSpeed,function() {
           data.state = "idle";
@@ -252,7 +271,9 @@ AppDispatcher.register(function(payload) {
         break;
       case 'PLAYER_BLOCK':
         if(data.state !== "idle") {
-          console.log("Can't block because you're currently", data.state);
+          if(data.alliance === "ally") {
+            MessageActions.sendMessage("Can't block because you're currently", data.state);
+          }
           return true;
         }
         data.state = "blocking";

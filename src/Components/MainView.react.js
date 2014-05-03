@@ -10,6 +10,7 @@ var SoundStore = require("../Stores/SoundStore");
 var AnimationStore = require("../Stores/AnimationStore");
 
 var ObjectActions = require("../Actions/ObjectActions");
+var MessageActions = require("../Actions/MessageActions");
 var Message = require("./Message.react");
 
 var clone = require("clone");
@@ -84,6 +85,7 @@ var View = React.createClass({
     document.addEventListener("mousemove", this._onMouseMove);
 
     ObjectActions.start(this.state.player, this.state.enemy);
+    MessageActions.sendMessage("Keybindings:\n enter: attack \n space: block \n shift: doge");
   },
 
   // equal: function(obj1, obj2) {
@@ -136,7 +138,6 @@ var View = React.createClass({
         Equipped Weapon: {enemy.equippedWeapon.name} <br />
         Damage: {enemy.equippedWeapon.damage} <br />
         </div>
-
         <Message
           width={width}
           height={height}
