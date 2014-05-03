@@ -21,11 +21,35 @@ var clone = require("clone");
 
 var ATTACK = 13;
 var BLOCK = 32;
-var DOGE = 10;
+var DOGE = 16;
+
+function getColor(n) {
+  var r = 255 - ~~(n/6000 * 255);
+  var g = ~~(n/6000 * 255);
+  var b = (~~(n/6000 * 255) - 200);
+  if(b < 0) {
+    b = 0;
+  }
+  var strR = r.toString(16);
+  var strG = g.toString(16);
+  var strB = b.toString(16);
+  if(r < 16) {
+    strR = "0" + strR;
+  }
+
+  if(g < 16) {
+    strG = "0" + strG;
+  }
+
+  if(b < 16) {
+    strB = "0" + strB;
+  }
+  var color = "#" + strR + strG + strB;
+  return color;
+}
 
 function getViewState() {
   return {
-    gameState: ObjectStore.getGameState(),
     styleBox: ObjectStore.getStyleBox(),
     enemy: ObjectStore.getEnemy(),
     player: ObjectStore.getPlayer()
@@ -89,17 +113,25 @@ var View = React.createClass({
         Player: <br /><br />
         Status: {player.state} <br />
         In animation {~~(player.currentAnimationTime / 1000)} <br />
-        Health: {player.health} <br />
+        Health: {~~player.health} <br />
         Stamina: {~~player.stamina} <br />
         Equipped Weapon: {player.equippedWeapon.name} <br />
         Damage: {player.equippedWeapon.damage} <br />
         </div>
         <br />
         <div className="player" style={styleBox}>
-        Next attack in {~~(enemy.nextAttackTime / 1000)} Enemy: <br /> <br />
+
+        Next attack: {~~(enemy.nextAttackTime / 1000)} <br />
+        <div className="circleBase" style={{
+            width: enemy.currentAnimationTime / 50,
+            height: enemy.currentAnimationTime / 50,
+            left: 200 - enemy.currentAnimationTime / 100,
+            top: 240 - enemy.currentAnimationTime / 100,
+            background: getColor(enemy.currentAnimationTime)
+          }}> <span>{~~(enemy.currentAnimationTime / 1000)}</span> </div>
+        Enemy: <br /> <br />
         Status: {enemy.state} <br />
-        In animation {~~(enemy.currentAnimationTime / 1000)} <br />
-        Health: {enemy.health} <br />
+        Health: {~~enemy.health} <br />
         Stamina: {~~enemy.stamina} <br />
         Equipped Weapon: {enemy.equippedWeapon.name} <br />
         Damage: {enemy.equippedWeapon.damage} <br />

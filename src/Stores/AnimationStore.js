@@ -19,6 +19,7 @@ var Node = function() {
   this.next = null;
   this.data = null;
   this.ID = getID();
+  this.pause = false;
   return this;
 }
 
@@ -43,6 +44,11 @@ function _animationLoop() {
   var prev = null;
 
   while(anim) {
+    if(anim.pause) {
+      prev = anim;
+      anim = anim.next;
+      continue;
+    }
     var data = anim.data;
     var curFrame = data.frames[data.frames.length - 1];
     var obj = data.obj;
@@ -123,44 +129,6 @@ function _createAnimation(startObj, endObj, objToAnimate, speedOfAnimation, call
     increments.push((endObj[availableParams[i]] - startObj[availableParams[i]]) / coef);
   }
 
-  // We create the head that will be returned as an animation
-
-  // var head = new Node();
-
-  // var list = new Node();
-  // list.data = {
-  //   obj: objToAnimate,
-  //   head: head
-  // };
-
-  // var cur = head;
-  // var prev = null;
-  // for (var i = 0; i <= coef; i++) {
-  //   var newObj = {};
-
-  //   // Go through all the increments of the parameters and
-  //   // do the increment. Basically creating one frame in time.
-  //   for (var j = 0; j < increments.length; j++) {
-  //     newObj[availableParams[j]] = startObj[availableParams[j]] + increments[j] * i;
-  //   }
-
-  //   cur.data = newObj;
-
-  //   // Create new current
-  //   cur.next = new Node();
-
-  //   // Used to remove the last Node which shouldn't be empty but should
-  //   // be null
-  //   prev = cur;
-  //   cur = cur.next;
-  // }
-
-  // // We remove the last node
-  // prev.next = null;
-
-  // // We add a callback for the last frame
-  // prev.callback = callback;
-
   var frames = new Array(coef);
 
   var list = new Node();
@@ -221,10 +189,18 @@ var AnimationStore = merge(EventEmitter.prototype, {
     requestAnimationFrame(_animationLoop);
     // setTimeout(_animationLoop, 1000/fps);
   },
-  pause: function() {
+  pause: function(anim) {
+    if(anim) {
+      anim.pause = true;
+      return;
+    }
     pause = true;
   },
-  toggle: function() {
+  toggle: function(anim) {
+    if(anim) {
+      anim.pause = !anim.pause;
+      return;
+    }
     pause = !pause;
     if(!pause) {
       requestAnimationFrame(_animationLoop);
