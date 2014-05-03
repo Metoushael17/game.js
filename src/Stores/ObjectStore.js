@@ -133,6 +133,7 @@ function attack(attacker, attacked) {
     if(attacker.state === "dead") {
       return;
     }
+    staminaStartIncrease(attacker);
 
     attacker.state = "idle";
 
@@ -180,8 +181,6 @@ function attack(attacker, attacked) {
 
   attacker.stamina -= attacker.equippedWeapon.staminaDamage;
 
-  staminaStartIncrease(attacker);
-
   ObjectStore.emit('change');
 }
 
@@ -199,11 +198,7 @@ function staminaStartIncrease(guy) {
     AnimationStore.delete(guy.staminaIncreasing);
   }
 
-  guy.staminaIncreasing = AnimationStore.createAnimation(timer, {t: guy.staminaIncrease}, timer, guy.staminaIncrease, function() {
-      guy.staminaIncreasing = AnimationStore.createAnimation(guy, {stamina: guy.maxStamina}, guy, (guy.maxStamina - guy.stamina) / 10 * 1000);
-
-      AnimationStore.playAnimation(guy.staminaIncreasing);
-  });
+  guy.staminaIncreasing = AnimationStore.createAnimation(guy, {stamina: guy.maxStamina}, guy, (guy.maxStamina - guy.stamina) / 10 * 1000);
 
   AnimationStore.playAnimation(guy.staminaIncreasing);
 }
@@ -278,13 +273,12 @@ AppDispatcher.register(function(payload) {
         data.stamina -= data.dodgeStamina;
         data.state = "dodging";
 
-        staminaStartIncrease(data);
-
         if(data.alliance === "ally") {
           MessageActions.sendMessage("Dodging...");
         }
 
         var anim = AnimationStore.createAnimation({currentAnimationTime: data.dodgeSpeed}, {currentAnimationTime: 0}, data, data.dodgeSpeed,function() {
+          staminaStartIncrease(data);
           data.state = "idle";
           ObjectStore.emit('change');
         });
