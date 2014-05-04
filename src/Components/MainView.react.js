@@ -111,41 +111,41 @@ var View = React.createClass({
 
     var player = this.state.player;
     var enemy = this.state.enemy;
-
+    // console.log(enemy.currentAnimationTime.curValue)
     return (
       <div id="view">
         <div className="player" style={styleBox}>
         Player: <br /><br />
         Status: {player.state} <br />
-        In animation {~~(player.currentAnimationTime / 1000)} <br />
+        In animation {~~(player.currentAnimationTime.curValue / 1000)} <br />
         Health: {~~player.health} <br />
         Stamina: {~~player.stamina} <br />
         Equipped Weapon: {player.equippedWeapon.name} <br />
         Damage: {player.equippedWeapon.damage} <br />
         </div>
         <div style={{
-          width: player.size.width,
-          height: player.size.height,
+          width: player.animations[player.state].width,
+          height: player.animations[player.state].height,
           overflow: "hidden",
           position: "absolute",
           left: 400,
           top: 0
         }} >
-          <img src={player.animations[player.state]} style={{
+          <img src={player.animations[player.state].url} style={{
             position: "absolute",
-            left: -(~~player.animations.frame) * player.size.width
+            left: -(~~(player.currentAnimationTime.curValue / player.currentAnimationTime.toValue * 4) * player.animations[player.state].width)
           }} />
         </div>
         <br />
         <div className="player" style={styleBox}>
-        Next attack: {~~(enemy.nextAttackTime / 1000)} <br />
+        Next attack: {~~(enemy.nextAttackTime.toValue / 1000) - ~~(enemy.nextAttackTime.curValue / 1000)} <br />
         <div className="circleBase" style={{
-            width: enemy.currentAnimationTime / 50,
-            height: enemy.currentAnimationTime / 50,
-            left: 200 - enemy.currentAnimationTime / 100,
-            top: 240 - enemy.currentAnimationTime / 100,
-            background: getColor(enemy.currentAnimationTime)
-          }}> <span>{~~(enemy.currentAnimationTime / 1000)}</span> </div>
+            width: enemy.currentAnimationTime.curValue / 50,
+            height: enemy.currentAnimationTime.curValue / 50,
+            left: 200 - enemy.currentAnimationTime.curValue / 100,
+            top: 240 - enemy.currentAnimationTime.curValue / 100,
+            background: getColor(enemy.currentAnimationTime.curValue)
+          }}> <span>{~~(enemy.currentAnimationTime.curValue / 1000)}</span> </div>
         Enemy: <br /> <br />
         Status: {enemy.state} <br />
         Health: {~~enemy.health} <br />
