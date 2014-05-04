@@ -23,24 +23,25 @@ var Node = function(data) {
   return this;
 }
 
-var frames = {
+var allAnimations = {
   head: null,
   tail: null
 };
 
 var Store = null;
 var pause = true;
+var LOOPING = true;
 
 var fps = 60;
-
 function _animationLoop() {
-  if(pause || (!frames.head && !frames.tail)) {
+  if(pause || (!allAnimations.head && !allAnimations.tail)) {
     return;
   }
+  LOOPING = true;
   // Since objects are accessed by pointers in the heap, we can just do
   // things like list.data = cur.next, and it will change the list.data
   // pointer to the new thing
-  var anim = frames.head;
+  var anim = allAnimations.head;
   var prev = null;
 
   while(anim) {
@@ -68,35 +69,34 @@ function _animationLoop() {
       // thing as before
       prev = anim;
     } else {
-      if(data.callback) {
-        data.callback();
-      }
-      // if(!!savedStart[curFrame.name]){
-      //   savedStart[curFrame.name]();
-      // }
-
       // If this was the first animation registered, then we move the
-      // global |frames.head| pointer
+      // global |allAnimations.head| pointer
       if(!prev) {
-        frames.head = anim.next;
-        // If anim is the last element, we update the |frames.tail| pointer
+        allAnimations.head = anim.next;
+        // If anim is the last element, we update the |allAnimations.tail| pointer
         if(!anim.next) {
-          frames.tail = null;
+          allAnimations.tail = null;
         }
       } else {
         prev.next = anim.next;
-        // If anim is the last element, we update the |frames.tail| pointer
+        // If anim is the last element, we update the |allAnimations.tail| pointer
         if(!anim.next) {
-          frames.tail = prev;
+          allAnimations.tail = prev;
         }
+      }
 
+      if(data.callback) {
+        data.callback();
       }
     }
     anim = anim.next;
   }
 
   AnimationStore.emit('update');
-  requestAnimationFrame(_animationLoop);
+  LOOPING = false;
+  setTimeout(function() {
+    requestAnimationFrame(_animationLoop);
+  }, 1000 / fps);
   // setTimeout(_animationLoop, 1000/fps);
 }
 
@@ -119,6 +119,14 @@ function _createAnimation(startObj, endObj, objToAnimate, speedOfAnimation, call
       found = false;
     }
   }
+
+  // var tmp = allAnimations.head;
+  // while(tmp) {
+  //   if(tmp.data.obj === objToAnimate) {
+  //     console.warn("You're changing the same value with two different animations, they might conflict");
+  //   }
+  //   tmp = tmp.next;
+  // }
 
   var increments = [];
   var coef = ~~(speedOfAnimation * fps / 1000);
@@ -154,27 +162,18 @@ function _createAnimation(startObj, endObj, objToAnimate, speedOfAnimation, call
 }
 
 function _playAnimation(anim) {
-  var prevPause = pause;
-  // We artificially pause just in case the scheduler isn't on our side
-  // for the small amount of lines
-  pause = true;
-
-  if(frames.tail) {
-    frames.tail.next = anim;
-    frames.tail = anim;
+  if(allAnimations.tail) {
+    allAnimations.tail.next = anim;
+    allAnimations.tail = anim;
   }
 
-  if(!frames.head) {
-    frames.head = anim;
-    frames.tail = anim;
-    if(!prevPause) {
+  if(!allAnimations.head) {
+    allAnimations.head = anim;
+    allAnimations.tail = anim;
+    if(!pause && !LOOPING) {
       requestAnimationFrame(_animationLoop);
       // setTimeout(_animationLoop, 1000/fps);
     }
-  }
-
-  if(!prevPause) {
-    pause = false;
   }
 }
 
@@ -215,7 +214,6 @@ function _animationLoop2() {
     if(data.filterFunction(val)) {
       data.curValue = data.mapFunction(val);
     }
-
     if(data.frames.length > 1) {
       // We chop the last element
       --data.frames.length;
@@ -258,14 +256,12 @@ function _animationLoop2() {
 }
 
 function _createAnimatedObject(val, callback){
-  val = val || 0;
-  callback = callback || function(val) {return val};
-
-  var toValue = 0;
   var obj = {
-    curValue: val,
+    curValue: val || 0,
+    __toValue: 0,
+    lastChangeValue: 0,
     frames: [],
-    callback: callback,
+    callback: callback || function(val) {return val},
     mapFunction: function(val) {return val;},
     filterFunction: function() {return true;},
     until: function(f) {
@@ -299,15 +295,15 @@ function _createAnimatedObject(val, callback){
 
   Object.defineProperty(obj, "toValue", {
     get: function() {
-      return toValue;
+      return obj.__toValue;
     },
     set: function(y) {
       if(y === obj.curValue) {
         return;
       }
-      toValue = y;
-      obj.frames = setFrames(obj, Math.abs(toValue - obj.curValue), callback);
-      console.log(obj.frames)
+      obj.lastChangeValue = obj.curValue;
+      obj.__toValue = y;
+      obj.frames = setFrames(obj, Math.abs(obj.__toValue - obj.curValue), obj.callback);
       var anim = new Node(obj);
 
       if(allAnimatedObjects.tail) {
@@ -358,19 +354,22 @@ var AnimationStore = merge(EventEmitter.prototype, {
   },
 
   delete: function(anim) {
-    if(frames.head) {
-      var tmp = frames.head;
+    if(!anim) {
+      return;
+    }
+    if(allAnimations.head) {
+      var tmp = allAnimations.head;
       var prev = null;
       while(tmp) {
         if(tmp.ID === anim.ID) {
           if(prev) {
             prev.next = tmp.next;
           } else {
-            frames.head = tmp.next;
+            allAnimations.head = tmp.next;
           }
 
           if(!tmp.next) {
-            frames.tail = prev;
+            allAnimations.tail = prev;
           }
           break;
         }

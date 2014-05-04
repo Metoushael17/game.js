@@ -12,7 +12,7 @@ var styleBox = {
 }
 
 var hands = {
-  attackSpeed: 1000,
+  attackSpeed: 500,
   staminaDamage: 20,
   damage: 5,
   type: "fists",
@@ -20,7 +20,7 @@ var hands = {
 }
 
 var dagger = {
-  attackSpeed: 2000,
+  attackSpeed: 1500,
   staminaDamage: 30,
   damage: 10,
   type: "dagger",
@@ -28,34 +28,46 @@ var dagger = {
 }
 
 var sword = {
-  attackSpeed: 3000,
-  staminaDamage: 70,
+  attackSpeed: 1500,
+  staminaDamage: 50,
   damage: 50,
   type: "longsword",
   name: "LongLightSaber Sword"
 }
 
+var shield = {
+  blockingSpeed: 300,
+  blockRatio: 0.4,
+  type: "simpleshield",
+  name: "The Mighty CockBlocker"
+}
+
 
 var enemy = {
-  currentAnimationTime: AnimationStore.createAnimatedObject(),
-  attackFrequency: 4000,
+  currentAnimation: null,
+  currentAnimationTime: 0,
   attackIntervalID: null,
   staminaIncreasing: 0,
-  nextAttackTime: AnimationStore.createAnimatedObject(),
+  nextAttackTime: 0,
   health: 100,
   maxHealth: 100,
   state: "idle",
   alliance: "enemy",
   stamina: 100,
   maxStamina: 100,
-  dodgeSpeed: 800,
   dodgeStamina: 20,
-  staminaIncrease: 4000,
-  equippedWeapon: sword
+  equippedWeapon: sword,
+  equippedShield: shield,
+  attackFrequency: 6000,
+  dodgeSpeed: 800,
+  staminaIncreaseSpeed: 4000,
+  staminaStartIncreaseSpeed: 1000,
+  idleSpeed: 2000
 }
 
 var player = {
-  currentAnimationTime: AnimationStore.createAnimatedObject(),
+  currentAnimation: null,
+  currentAnimationTime: 0,
   staminaIncreasing: 0,
   health: 100,
   maxHealth: 100,
@@ -63,10 +75,9 @@ var player = {
   alliance: "ally",
   stamina: 100,
   maxStamina: 100,
-  dodgeSpeed: 1500,
   dodgeStamina: 20,
-  staminaIncrease: 4000,
   equippedWeapon: dagger,
+  equippedShield: shield,
   animations: {
     idle: {
       url: "./resources/animation/idle.jpg",
@@ -76,11 +87,11 @@ var player = {
     attacking: {
       url: "./resources/animation/attacking.jpg",
       width: 168,
-      height: 128
+      height: 144
     },
     blocking: {
       url: "./resources/animation/blocking.jpg",
-      width: 136,
+      width: 168,
       height: 144
     },
     dodging: {
@@ -93,16 +104,26 @@ var player = {
       width: 136,
       height: 144
     }
+  },
+  dodgeSpeed: 1000,
+  staminaIncreaseSpeed: 4000,
+  staminaStartIncreaseSpeed: 1000,
+  idleSpeed: 3000
+}
+
+function idle(guy) {
+  if(guy.state === "idle") {
+    AnimationStore.delete(guy.currentAnimation);
+    guy.currentAnimation = AnimationStore.createAnimation({currentAnimationTime: 0}, {currentAnimationTime: 4000}, guy, guy.idleSpeed, function() {
+      idle(guy);
+    });
+    AnimationStore.playAnimation(guy.currentAnimation);
   }
 }
 
-function idle() {
-  player.currentAnimationTime.callback = idle;
-  player.currentAnimationTime.curValue = 0;
-  player.currentAnimationTime.toValue = 2000;
-}
-
-var timer = AnimationStore.createAnimatedObject();
+var timer = {
+  t: 0
+};
 
 // var allObjects = [];
 var gameState = "";
@@ -138,21 +159,20 @@ function attack(attacker, attacked) {
   }
 
   attacker.state = "attacking";
-  // var anim = AnimationStore.createAnimation({currentAnimationTime: attacker.equippedWeapon.attackSpeed}, {currentAnimationTime: 0}, attacker, attacker.equippedWeapon.attackSpeed, );
 
-  // AnimationStore.playAnimation(anim);
-
-  // We set the callback
-  player.currentAnimationTime.callback = function() {
+  AnimationStore.delete(attacker.currentAnimation)
+  attacker.currentAnimation = AnimationStore.createAnimation({currentAnimationTime: 0}, {currentAnimationTime: 4000}, attacker, attacker.equippedWeapon.attackSpeed, function() {
     if(attacker.state === "dead") {
       return;
     }
+    AnimationStore.delete(attacker.staminaIncreasing)
     staminaStartIncrease(attacker);
 
     attacker.state = "idle";
+    idle(attacker);
 
     if(attacked.state === "blocking") {
-      attacked.stamina -= attacker.equippedWeapon.damage * 0.7;
+      attacked.stamina -= attacker.equippedWeapon.damage * attacked.equippedShield.blockRatio;
       if(attacked.stamina <= 0) {
         attacked.health += attacked.stamina;
         attacked.stamina = 0;
@@ -162,15 +182,10 @@ function attack(attacker, attacked) {
       }
       AnimationStore.delete(attacked.staminaIncreasing)
 
-      timer.callback = function() {
+      var anim = AnimationStore.createAnimation({t: 0}, {t: 1000}, timer, attacked.staminaStartIncreaseSpeed, function() {
         staminaStartIncrease(attacked);
-      };
-      timer.curValue = 0;
-      timer.toValue = 1000;
-      // var anim = AnimationStore.createAnimation({t: 0}, {t: 1000}, timer, 1000, function() {
-      //   staminaStartIncrease(attacked);
-      // });
-      // AnimationStore.playAnimation(anim);
+      });
+      AnimationStore.playAnimation(anim);
 
       if(attacker.alliance === "ally") {
         MessageActions.sendMessage("blocked");
@@ -199,16 +214,16 @@ function attack(attacker, attacked) {
     }
 
     ObjectStore.emit("change");
-  }
+  });
 
-  player.currentAnimationTime.curValue = 0;
-  player.currentAnimationTime.toValue = attacker.equippedWeapon.attackSpeed;
+  AnimationStore.playAnimation(attacker.currentAnimation);
 
-  attacker.stamina -= attacker.equippedWeapon.staminaDamage;
 
   if(attacker.staminaIncreasing) {
     AnimationStore.delete(attacker.staminaIncreasing);
   }
+
+  attacker.stamina -= attacker.equippedWeapon.staminaDamage;
 
   ObjectStore.emit('change');
 }
@@ -218,12 +233,15 @@ function isDead(guy) {
   guy.health = 0;
   guy.stamina = 0;
   AnimationStore.delete(guy.staminaIncreasing);
+  if(guy.attackIntervalID) {
+    AnimationStore.delete(guy.attackIntervalID);
+  }
   guy.equippedWeapon = hands;
   ObjectStore.emit("change");
 }
 
 function staminaStartIncrease(guy) {
-  guy.staminaIncreasing = AnimationStore.createAnimation(guy, {stamina: guy.maxStamina}, guy, (guy.maxStamina - guy.stamina) / 10 * 1000);
+  guy.staminaIncreasing = AnimationStore.createAnimation(guy, {stamina: guy.maxStamina}, guy, (guy.maxStamina - guy.stamina) / guy.maxStamina * guy.staminaIncreaseSpeed);
 
   AnimationStore.playAnimation(guy.staminaIncreasing);
 }
@@ -231,13 +249,13 @@ function staminaStartIncrease(guy) {
 function enemyAttack(enemy, player) {
   if(player.state !== "dead" && enemy.state !== "dead") {
     attack(enemy, player);
+    var time = rand(enemy.attackFrequency - 2000, enemy.attackFrequency + 2000);
+    AnimationStore.delete(enemy.attackIntervalID)
+    enemy.attackIntervalID = AnimationStore.createAnimation({nextAttackTime: time}, {nextAttackTime: 0}, enemy, time, function() {
+      enemyAttack(enemy, player);
+    });
 
-    enemy.nextAttackTime.curValue = 0;
-    enemy.nextAttackTime.toValue = rand(enemy.attackFrequency - 2000, enemy.attackFrequency + 2000);
-
-    // enemy.attackIntervalID = AnimationStore.createAnimation({nextAttackTime: time}, {nextAttackTime: 0}, enemy, time, );
-
-    // AnimationStore.playAnimation(enemy.attackIntervalID);
+    AnimationStore.playAnimation(enemy.attackIntervalID);
   }
 }
 
@@ -273,17 +291,14 @@ AppDispatcher.register(function(payload) {
     //   onCellClick(data);
     //   break;
       case 'START':
-        // AnimationStore.start();
-        idle();
-        // enemy.nextAttackTime.callback = function() {
-        //   enemyAttack(enemy, player);
-        // }
+        AnimationStore.start();
+        idle(data.player);
 
-        // enemy.nextAttackTime.curValue = 0;
-        // enemy.nextAttackTime.toValue = rand(enemy.attackFrequency - 2000, enemy.attackFrequency + 2000);
-        // data.enemy.attackIntervalID = AnimationStore.createAnimation({nextAttackTime: data.enemy.attackFrequency}, {nextAttackTime: 0}, data.enemy, data.enemy.attackFrequency, );
+        data.enemy.attackIntervalID = AnimationStore.createAnimation({nextAttackTime: data.enemy.attackFrequency}, {nextAttackTime: 0}, data.enemy, data.enemy.attackFrequency, function() {
+          enemyAttack(data.enemy, data.player);
+        });
 
-        // AnimationStore.playAnimation(data.enemy.attackIntervalID);
+        AnimationStore.playAnimation(data.enemy.attackIntervalID);
         break;
       case 'PLAYER_ATTACK':
         attack(data.player, data.enemy);
@@ -309,7 +324,8 @@ AppDispatcher.register(function(payload) {
           MessageActions.sendMessage("Dodging...");
         }
 
-        var anim = AnimationStore.createAnimation({currentAnimationTime: 0}, {currentAnimationTime: data.dodgeSpeed}, data, data.dodgeSpeed,function() {
+        AnimationStore.delete(data.currentAnimation)
+        data.currentAnimation = AnimationStore.createAnimation({currentAnimationTime: 0}, {currentAnimationTime: 4000}, data, data.dodgeSpeed,function() {
           if(data.state === "dead") {
             isDead(data);
             return;
@@ -318,7 +334,7 @@ AppDispatcher.register(function(payload) {
           data.state = "idle";
           ObjectStore.emit('change');
         });
-        AnimationStore.playAnimation(anim);
+        AnimationStore.playAnimation(data.currentAnimation);
 
         if(data.staminaIncreasing) {
           AnimationStore.delete(data.staminaIncreasing);
@@ -333,19 +349,22 @@ AppDispatcher.register(function(payload) {
         }
         data.state = "blocking";
 
-        player.currentAnimationTime.callback = function() {};
-        player.currentAnimationTime.curValue = 0;
-        player.currentAnimationTime.toValue = 2000;
+        AnimationStore.delete(data.currentAnimation)
+        data.currentAnimation = AnimationStore.createAnimation({currentAnimationTime: 0}, {currentAnimationTime: 4000}, player, data.equippedShield.blockingSpeed);
+
+        AnimationStore.playAnimation(data.currentAnimation);
         break;
       case 'PLAYER_UNBLOCK':
         if(data.state !== "blocking") {
           return true;
         }
 
-        player.currentAnimationTime.callback = function() {
+        AnimationStore.delete(data.currentAnimation)
+        data.currentAnimation = AnimationStore.createAnimation(player, {currentAnimationTime: 0}, player, player.currentAnimationTime / 4000 * data.equippedShield.blockingSpeed, function() {
           data.state = "idle";
-        };
-        player.currentAnimationTime.toValue = 0;
+          idle(data);
+        });
+        AnimationStore.playAnimation(data.currentAnimation);
         break;
   }
 
