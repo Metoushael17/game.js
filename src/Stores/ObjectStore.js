@@ -12,7 +12,7 @@ var styleBox = {
 }
 
 var hands = {
-  attackSpeed: 500,
+  attackSpeed: 400,
   staminaDamage: 20,
   damage: 5,
   type: "fists",
@@ -20,7 +20,7 @@ var hands = {
 }
 
 var dagger = {
-  attackSpeed: 1500,
+  attackSpeed: 700,
   staminaDamage: 30,
   damage: 10,
   type: "dagger",
@@ -28,7 +28,7 @@ var dagger = {
 }
 
 var sword = {
-  attackSpeed: 1500,
+  attackSpeed: 1000,
   staminaDamage: 50,
   damage: 50,
   type: "longsword",
@@ -37,7 +37,7 @@ var sword = {
 
 var shield = {
   blockingSpeed: 300,
-  blockRatio: 0.4,
+  blockRatio: 0.1,
   type: "simpleshield",
   name: "The Mighty CockBlocker"
 }
@@ -58,7 +58,7 @@ var enemy = {
   dodgeStamina: 20,
   equippedWeapon: sword,
   equippedShield: shield,
-  attackFrequency: 6000,
+  attackFrequency: 4000,
   dodgeSpeed: 800,
   staminaIncreaseSpeed: 4000,
   staminaStartIncreaseSpeed: 1000,
@@ -172,7 +172,7 @@ function attack(attacker, attacked) {
     idle(attacker);
 
     if(attacked.state === "blocking") {
-      attacked.stamina -= attacker.equippedWeapon.damage * attacked.equippedShield.blockRatio;
+      attacked.stamina -= attacker.equippedWeapon.damage * (1 - attacked.equippedShield.blockRatio);
       if(attacked.stamina <= 0) {
         attacked.health += attacked.stamina;
         attacked.stamina = 0;
@@ -249,7 +249,7 @@ function staminaStartIncrease(guy) {
 function enemyAttack(enemy, player) {
   if(player.state !== "dead" && enemy.state !== "dead") {
     attack(enemy, player);
-    var time = rand(enemy.attackFrequency - 2000, enemy.attackFrequency + 2000);
+    var time = rand(enemy.attackFrequency - enemy.attackFrequency * 0.2, enemy.attackFrequency + enemy.attackFrequency * 0.2);
     AnimationStore.delete(enemy.attackIntervalID)
     enemy.attackIntervalID = AnimationStore.createAnimation({nextAttackTime: time}, {nextAttackTime: 0}, enemy, time, function() {
       enemyAttack(enemy, player);
