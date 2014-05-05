@@ -81,7 +81,6 @@ var DevTools = React.createClass({
   },
 
   _onEdit: function() {
-    console.log(Weapons)
     localStorage.Weapons = JSON.stringify(Weapons);
     localStorage.Shields = JSON.stringify(Shields);
     localStorage.Player = JSON.stringify(Player);
