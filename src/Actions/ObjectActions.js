@@ -21,23 +21,6 @@ var objectPool = (function () {
 })();
 
 var ObjectActions = {
-  // removeShip: function(s) {
-  //   var packet = objectPool.getObject();
-  //   packet.actionType = 'REMOVE_SHIP';
-  //   packet.data = s;
-  //   AppDispatcher.handleObjectAction(packet);
-  // },
-
-  start: function(player, enemy) {
-    var packet = objectPool.getObject();
-    packet.actionType = 'START';
-    packet.data = {
-      player: player,
-      enemy: enemy
-    }
-    AppDispatcher.handleObjectAction(packet);
-  },
-
   playerAttack: function(player, enemy) {
     var packet = objectPool.getObject();
     packet.actionType = 'PLAYER_ATTACK';

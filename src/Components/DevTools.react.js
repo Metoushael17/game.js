@@ -5,8 +5,10 @@
 "use strict";
 var React = require("react");
 var JsonEdit = require("../../lib/JsonEdit");
-var AnimationStore = require("../Stores/AnimationStore");
 var clone = require("clone");
+
+var AnimationStore = require("../Stores/AnimationStore");
+var ObjectStore = require("../Stores/ObjectStore");
 
 var Weapons = require("../Objects/Weapons");
 var Shields = require("../Objects/Shields");
@@ -55,8 +57,13 @@ var DevTools = React.createClass({
   },
 
   _reset: function() {
+    var state = Player.state;
     this._resetObj(Player, cachedPlayer);
     this._resetObj(Enemies, cachedEnemies);
+    if(state === 'dead') {
+      ObjectStore.load(Player);
+      ObjectStore.load(Enemies);
+    }
   },
 
   _resetObj: function(toReset, model) {

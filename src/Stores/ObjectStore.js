@@ -8,13 +8,8 @@ var MessageActions = require("../Actions/MessageActions");
 
 var Weapons = require("../Objects/Weapons");
 var Shields = require("../Objects/Shields");
-var player = require("../Objects/Player");
-var enemy = require("../Objects/Enemies").simple;
 
-var styleBox = {
-  top: 0,
-  left: 0
-}
+var player, enemy;
 
 function idle(guy) {
   if(guy.state === "idle") {
@@ -22,7 +17,6 @@ function idle(guy) {
     guy.currentAnimation = AnimationStore.createAnimation({currentAnimationTime: 0}, {currentAnimationTime: 4000}, guy, guy.idleSpeed, function() {
       idle(guy);
     });
-    AnimationStore.playAnimation(guy.currentAnimation);
   }
 }
 
@@ -90,7 +84,6 @@ function attack(attacker, attacked) {
       var anim = AnimationStore.createAnimation({t: 0}, {t: 1000}, timer, attacked.staminaStartIncreaseSpeed, function() {
         staminaStartIncrease(attacked);
       });
-      AnimationStore.playAnimation(anim);
 
       if(attacker.alliance === "ally") {
         MessageActions.sendMessage("blocked");
@@ -121,7 +114,6 @@ function attack(attacker, attacked) {
     ObjectStore.emit("change");
   });
 
-  AnimationStore.playAnimation(attacker.currentAnimation);
 
 
   if(attacker.staminaIncreasing) {
@@ -148,7 +140,6 @@ function isDead(guy) {
 function staminaStartIncrease(guy) {
   guy.staminaIncreasing = AnimationStore.createAnimation(guy, {stamina: guy.maxStamina}, guy, (guy.maxStamina - guy.stamina) / guy.maxStamina * guy.staminaIncreaseSpeed);
 
-  AnimationStore.playAnimation(guy.staminaIncreasing);
 }
 
 function enemyAttack(enemy, player) {
@@ -160,14 +151,22 @@ function enemyAttack(enemy, player) {
       enemyAttack(enemy, player);
     });
 
-    AnimationStore.playAnimation(enemy.attackIntervalID);
   }
 }
 
 var ObjectStore = merge(EventEmitter.prototype, {
-  // getGameState: function() {
-  //   return gameState;
-  // },
+  load: function(guy) {
+    if(guy.alliance === "ally") {
+      player = guy;
+      idle(player);
+    } else if(guy.alliance === "enemy") {
+      enemy = guy;
+      enemy.attackIntervalID = AnimationStore.createAnimation({nextAttackTime: enemy.attackFrequency}, {nextAttackTime: 0}, enemy, enemy.attackFrequency, function() {
+        enemyAttack(enemy, player);
+      });
+
+    }
+  },
 
   getPlayer: function() {
     return player;
@@ -175,10 +174,6 @@ var ObjectStore = merge(EventEmitter.prototype, {
 
   getEnemy: function() {
     return enemy;
-  },
-
-  getStyleBox: function() {
-    return styleBox;
   }
 });
 
@@ -192,19 +187,6 @@ AppDispatcher.register(function(payload) {
   var action = payload.action;
   var data = action.data;
   switch(action.actionType) {
-    // case 'ON_CELL_CLICK':
-    //   onCellClick(data);
-    //   break;
-      case 'START':
-        // AnimationStore.start();
-        idle(data.player);
-
-        data.enemy.attackIntervalID = AnimationStore.createAnimation({nextAttackTime: data.enemy.attackFrequency}, {nextAttackTime: 0}, data.enemy, data.enemy.attackFrequency, function() {
-          enemyAttack(data.enemy, data.player);
-        });
-
-        AnimationStore.playAnimation(data.enemy.attackIntervalID);
-        break;
       case 'PLAYER_ATTACK':
         attack(data.player, data.enemy);
         break;
@@ -239,7 +221,6 @@ AppDispatcher.register(function(payload) {
           data.state = "idle";
           ObjectStore.emit('change');
         });
-        AnimationStore.playAnimation(data.currentAnimation);
 
         if(data.staminaIncreasing) {
           AnimationStore.delete(data.staminaIncreasing);
@@ -257,7 +238,6 @@ AppDispatcher.register(function(payload) {
         AnimationStore.delete(data.currentAnimation)
         data.currentAnimation = AnimationStore.createAnimation({currentAnimationTime: 0}, {currentAnimationTime: 4000}, player, data.equippedShield.blockingSpeed);
 
-        AnimationStore.playAnimation(data.currentAnimation);
         break;
       case 'PLAYER_UNBLOCK':
         if(data.state !== "blocking") {
@@ -269,7 +249,6 @@ AppDispatcher.register(function(payload) {
           data.state = "idle";
           idle(data);
         });
-        AnimationStore.playAnimation(data.currentAnimation);
         break;
   }
 

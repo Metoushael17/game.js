@@ -46,9 +46,12 @@ function getColor(n) {
   return color;
 }
 
+
+ObjectStore.load(require("../Objects/Player"));
+ObjectStore.load(require("../Objects/Enemies").simple);
+
 function getViewState() {
   return {
-    styleBox: ObjectStore.getStyleBox(),
     enemy: ObjectStore.getEnemy(),
     player: ObjectStore.getPlayer()
   }
@@ -59,20 +62,8 @@ var PlayerView = React.createClass({
     return getViewState();
   },
 
-  componentWillMount: function(){
-    window.onresize = this.onResize;
-    this.onResize();
-  },
-
   componentWillUnmount: function() {
     ObjectStore.removeListener('change', this._onChange);
-  },
-
-  onResize: function() {
-    this.setState({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
   },
 
   componentDidMount: function() {
@@ -81,7 +72,6 @@ var PlayerView = React.createClass({
     document.addEventListener("keyup", this._onKeyUp);
     document.addEventListener("mousemove", this._onMouseMove);
 
-    ObjectActions.start(this.state.player, this.state.enemy);
     MessageActions.sendMessage("Keybindings: ");
     MessageActions.sendMessage("enter: attack");
     MessageActions.sendMessage("space: block");
@@ -98,29 +88,16 @@ var PlayerView = React.createClass({
   // },
 
   render: function() {
-    var width = this.state.width;
-    var height = this.state.height;
-
-    var styleBox = {
-      // WebkitTransform: "translate(" + Math.round(this.state.styleBox.top) + "px," + Math.round(this.state.styleBox.left) + "px)",
-      // transform: "translate(" + Math.round(this.state.styleBox.top) + "px," + Math.round(this.state.styleBox.left) + "px)"
-    }
-
     var player = this.state.player;
     var enemy = this.state.enemy;
 
     var circleRadius = enemy.state === "attacking" ? enemy.currentAnimationTime : 0;
 
-    var leftPositionPlayerAnimation = -(~~((player.currentAnimationTime - 1)/1000) * player.animations[player.state].width);
+    var translate =  "translate(-" + (~~((player.currentAnimationTime - 1)/1000) * player.animations[player.state].width) + "px, 0px)";
 
-
-    // <Message
-    //       width={width}
-    //       height={height}
-    //     />
     return (
       <div id="PlayerView">
-        <div className="player" style={styleBox}>
+        <div className="player">
         Player: <br /><br />
         Status: {player.state} <br />
         In animation {~~(player.currentAnimationTime / 1000)} <br />
@@ -140,20 +117,24 @@ var PlayerView = React.createClass({
           top: 0
         }} >
           <img src={player.animations[player.state].url} style={{
-            transform: "translate(" + leftPositionPlayerAnimation + "px, 0px)",
-            WebkitTransform: "translate(" + leftPositionPlayerAnimation + "px, 0px)"
+            transform: translate,
+            WebkitTransform: translate
           }} />
         </div>
         <br />
-        <div className="player" style={styleBox}>
+        <div className="player">
         Next attack: {~~(enemy.nextAttackTime / 1000)} <br />
-        <div className="circleBase" style={{
+
+          <div className="circleBase" style={{
             width: circleRadius / 50,
             height: circleRadius / 50,
             left: 200 - circleRadius / 100,
             top: 270 - circleRadius / 100,
             background: getColor(circleRadius)
-          }}> <span>{~~(circleRadius / 1000)}</span> </div>
+          }}>
+          <span>{~~(circleRadius / 1000)}</span>
+          </div>
+
         Enemy: <br /> <br />
         Status: {enemy.state} <br />
         Health: {~~enemy.health} <br />
