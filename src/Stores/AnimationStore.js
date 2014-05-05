@@ -342,6 +342,7 @@ var AnimationStore = merge(EventEmitter.prototype, {
     pause = true;
   },
   toggle: function(anim) {
+    console.log("TOGGLE")
     if(anim) {
       anim.pause = !anim.pause;
       return;
