@@ -6,109 +6,14 @@ var AnimationStore = require("./AnimationStore");
 
 var MessageActions = require("../Actions/MessageActions");
 
+var Weapons = require("../Objects/Weapons");
+var Shields = require("../Objects/Shields");
+var player = require("../Objects/Player");
+var enemy = require("../Objects/Enemies").simple;
+
 var styleBox = {
   top: 0,
   left: 0
-}
-
-var hands = {
-  attackSpeed: 400,
-  staminaDamage: 20,
-  damage: 5,
-  type: "fists",
-  name: "Bare hands"
-}
-
-var dagger = {
-  attackSpeed: 700,
-  staminaDamage: 30,
-  damage: 10,
-  type: "dagger",
-  name: "The Pussy Dagger"
-}
-
-var sword = {
-  attackSpeed: 1000,
-  staminaDamage: 50,
-  damage: 50,
-  type: "longsword",
-  name: "LongLightSaber Sword"
-}
-
-var shield = {
-  blockingSpeed: 300,
-  blockRatio: 0.1,
-  type: "simpleshield",
-  name: "The Mighty CockBlocker"
-}
-
-
-var enemy = {
-  currentAnimation: null,
-  currentAnimationTime: 0,
-  attackIntervalID: null,
-  staminaIncreasing: 0,
-  nextAttackTime: 0,
-  health: 100,
-  maxHealth: 100,
-  state: "idle",
-  alliance: "enemy",
-  stamina: 100,
-  maxStamina: 100,
-  dodgeStamina: 20,
-  equippedWeapon: sword,
-  equippedShield: shield,
-  attackFrequency: 4000,
-  dodgeSpeed: 800,
-  staminaIncreaseSpeed: 4000,
-  staminaStartIncreaseSpeed: 1000,
-  idleSpeed: 2000
-}
-
-var player = {
-  currentAnimation: null,
-  currentAnimationTime: 0,
-  staminaIncreasing: 0,
-  health: 100,
-  maxHealth: 100,
-  state: "idle",
-  alliance: "ally",
-  stamina: 100,
-  maxStamina: 100,
-  dodgeStamina: 20,
-  equippedWeapon: dagger,
-  equippedShield: shield,
-  animations: {
-    idle: {
-      url: "./resources/animation/idle.jpg",
-      width: 136,
-      height: 144
-    },
-    attacking: {
-      url: "./resources/animation/attacking.jpg",
-      width: 168,
-      height: 144
-    },
-    blocking: {
-      url: "./resources/animation/blocking.jpg",
-      width: 168,
-      height: 144
-    },
-    dodging: {
-      url: "./resources/animation/dodging.jpg",
-      width: 136,
-      height: 144
-    },
-    dead: {
-      url: "./resources/animation/dead.jpg",
-      width: 136,
-      height: 144
-    }
-  },
-  dodgeSpeed: 1000,
-  staminaIncreaseSpeed: 4000,
-  staminaStartIncreaseSpeed: 1000,
-  idleSpeed: 3000
 }
 
 function idle(guy) {
@@ -236,7 +141,7 @@ function isDead(guy) {
   if(guy.attackIntervalID) {
     AnimationStore.delete(guy.attackIntervalID);
   }
-  guy.equippedWeapon = hands;
+  guy.equippedWeapon = Weapons.hands;
   ObjectStore.emit("change");
 }
 
@@ -291,7 +196,7 @@ AppDispatcher.register(function(payload) {
     //   onCellClick(data);
     //   break;
       case 'START':
-        AnimationStore.start();
+        // AnimationStore.start();
         idle(data.player);
 
         data.enemy.attackIntervalID = AnimationStore.createAnimation({nextAttackTime: data.enemy.attackFrequency}, {nextAttackTime: 0}, data.enemy, data.enemy.attackFrequency, function() {

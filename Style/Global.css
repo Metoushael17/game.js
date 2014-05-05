@@ -1,5 +1,10 @@
-#view {
+#main {
   position: relative;
+}
+#DevTools {
+  position: absolute;
+  left: 600px;
+  top: 20px ;
 }
 
 .player {
