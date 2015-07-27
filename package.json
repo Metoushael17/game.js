@@ -6,8 +6,7 @@
   "dependencies": {
     "clone": "",
     "react": "",
-    "underscore": "",
-    "wingspan-cursor": "^0.1.0"
+    "underscore": ""
   },
   "devDependencies": {
     "grunt": "",
