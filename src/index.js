@@ -1,9 +1,6 @@
-/** @jsx React.DOM */
+let React = require('react');
 
-"use strict";
-var React = require('react');
-
-var MainView = require('./Components/MainView.react');
+let MainView = require('./Components/MainView.react');
 
 React.renderComponent(
   <MainView />,

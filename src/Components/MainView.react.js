@@ -1,20 +1,16 @@
-/** @jsx React.DOM */
+import React from 'react';
+import DevTools from './DevTools.react';
+import PlayerView from './PlayerView.react';
 
-"use strict";
-var React = require("react");
-
-var DevTools = require("./DevTools.react");
-var PlayerView = require("./PlayerView.react");
-
-var MainView = React.createClass({
-  render: function() {
+const MainView = React.createClass({
+  render() {
     return (
       <div id="main">
         <PlayerView />
         <DevTools />
       </div>
     );
-  }
+  },
 });
 
 

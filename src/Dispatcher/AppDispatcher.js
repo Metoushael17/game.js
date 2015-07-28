@@ -1,33 +1,24 @@
-/**
- *
- * AppDispatcher
- *
- * A singleton that operates as the central hub for application updates.
- */
+import Dispatcher from './Dispatcher';
 
-var Dispatcher = require('./Dispatcher');
-
-var merge = require('react/lib/merge');
-
-var AppDispatcher = merge(Dispatcher.prototype, {
-  handleObjectAction: function(action) {
+const AppDispatcher = Object.assign(Dispatcher.prototype, {
+  handleObjectAction(action) {
     this.dispatch({
       source: 'OBJECT_ACTION',
-      action: action
+      action: action,
     });
   },
 
-  handleAnimationAction: function(action) {
+  handleAnimationAction(action) {
     this.dispatch({
       source: 'ANIMATION_ACTION',
-      action: action
+      action: action,
     });
   },
 
-  handleMessageAction: function(action) {
+  handleMessageAction(action) {
     this.dispatch({
       source: 'MESSAGE_ACTION',
-      action: action
+      action: action,
     });
   },
 
@@ -37,12 +28,12 @@ var AppDispatcher = merge(Dispatcher.prototype, {
    *
    * @param  {Object} action The data coming from the view
    */
-  handleSocketAction: function(action) {
+  handleSocketAction(action) {
     this.dispatch({
       source: 'SOCKET_ACTION',
-      action: action
+      action: action,
     });
-  }
+  },
 });
 
 module.exports = AppDispatcher;

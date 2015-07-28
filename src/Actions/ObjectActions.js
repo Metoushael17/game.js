@@ -1,50 +1,29 @@
-var AppDispatcher = require('../Dispatcher/AppDispatcher');
+import AppDispatcher from '../Dispatcher/AppDispatcher';
 
-var objectPool = (function () {
-  var objectPool = [];
-  var SIZE = 500;
-  var index = 0;
-
-  for (var i = 0; i < SIZE; i++) {
-    objectPool.push({
-      actionType: "",
-      data: null
+const ObjectActions = {
+  playerAttack(player, enemy) {
+    AppDispatcher.handleObjectAction({
+      actionType: 'PLAYER_ATTACK',
+      data: {
+        player: player,
+        enemy: enemy,
+      },
     });
-  }
-
-  return {
-    getObject: function() {
-      index = (index + 1) % SIZE;
-      return objectPool[index];
-    }
-  }
-})();
-
-var ObjectActions = {
-  playerAttack: function(player, enemy) {
-    var packet = objectPool.getObject();
-    packet.actionType = 'PLAYER_ATTACK';
-    packet.data = {
-      player: player,
-      enemy: enemy
-    }
-    AppDispatcher.handleObjectAction(packet);
   },
 
-  playerDodge: function(player) {
-    var packet = objectPool.getObject();
-    packet.actionType = 'PLAYER_DODGE';
-    packet.data = player;
-    AppDispatcher.handleObjectAction(packet);
+  playerDodge(player) {
+    AppDispatcher.handleObjectAction({
+      actionType: 'PLAYER_DODGE',
+      data: player,
+    });
   },
 
-  playerBlock: function(player, bool) {
-    var packet = objectPool.getObject();
-
-    packet.actionType = bool ? 'PLAYER_BLOCK' : 'PLAYER_UNBLOCK';
-    packet.data = player;
-    AppDispatcher.handleObjectAction(packet);
-  }
+  playerBlock(player, bool) {
+    AppDispatcher.handleObjectAction({
+      actionType: bool ? 'PLAYER_BLOCK' : 'PLAYER_UNBLOCK',
+      data: player,
+    });
+  },
 };
 
 module.exports = ObjectActions;

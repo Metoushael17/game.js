@@ -1,20 +1,8 @@
-"use strict";
-
-var clone = require("clone");
-
-var shield = {
+const Shield = {
   blockingSpeed: 300,
   blockRatio: 0.1,
-  type: "simpleshield",
-  name: "The Mighty CockBlocker"
-}
-
-var Shield = {
-  shield: shield
+  type: 'simpleshield',
+  name: 'The Mighty CockBlocker',
 };
 
-if(localStorage.Shield) {
-  Shield = JSON.parse(localStorage.Shield);
-}
-
-module.exports = Shield;
+export default Shield;

@@ -1,38 +1,39 @@
-var AppDispatcher = require('../Dispatcher/AppDispatcher');
-var EventEmitter = require('events').EventEmitter;
-var merge = require('react/lib/merge');
+import AppDispatcher from 'Dispatcher/AppDispatcher';
+import {EventEmitter} from 'events';
+import merge from 'react/lib/merge';
 
-var messages = [];
+let messages = [];
 
-var MessageStore = merge(EventEmitter.prototype, {
-  getMessages: function() {
+const MessageStore = merge(EventEmitter.prototype, {
+  getMessages() {
     return messages;
-  }
+  },
 });
 
 function _addMessage(msg) {
   messages.push({
     timeStamp: Date.now(),
-    message: msg
+    message: msg,
   });
 }
 
-AppDispatcher.register(function(payload) {
-  if(payload.source !== "MESSAGE_ACTION" && payload.source !== "OBJECT_ACTION") {
+AppDispatcher.register((payload) => {
+  if (payload.source !== 'MESSAGE_ACTION' && payload.source !== 'OBJECT_ACTION') {
     return true;
   }
 
-  var action = payload.action;
-  var data = action.data;
+  const action = payload.action;
+  const data = action.data;
 
-  switch(action.actionType) {
+  switch (action.actionType) {
     case 'NEW_MESSAGE':
       _addMessage(data);
       break;
+    default:
+      break;
   }
 
-  MessageStore.emit("change");
-
+  MessageStore.emit('change');
   return true;
 });
 

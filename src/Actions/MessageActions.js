@@ -1,12 +1,12 @@
-var AppDispatcher = require('../Dispatcher/AppDispatcher');
+import AppDispatcher from '../Dispatcher/AppDispatcher';
 
-var ObjectActions = {
-  sendMessage: function(message) {
+const ObjectActions = {
+  sendMessage(message) {
     AppDispatcher.handleMessageAction({
       actionType: 'NEW_MESSAGE',
-      data: message
+      data: message,
     });
-  }
+  },
 };
 
 module.exports = ObjectActions;

@@ -1,4 +1,4 @@
-#React - Game.js
+#Game.js
 _by Peter, Eric and Benjamin_
 
-Simple combat game.
+Simple combat game part of a weekly contest.

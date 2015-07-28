@@ -1,37 +1,32 @@
-/**
- * @jsx React.DOM
- */
+import React from 'react';
+import JsonEdit from '../../lib/JsonEdit';
+import clone from '../../lib/clone';
 
-"use strict";
-var React = require("react");
-var JsonEdit = require("../../lib/JsonEdit");
-var clone = require("clone");
+import AnimationStore from '../Stores/AnimationStore';
+import ObjectStore from '../Stores/ObjectStore';
 
-var AnimationStore = require("../Stores/AnimationStore");
-var ObjectStore = require("../Stores/ObjectStore");
+import Weapons from '../Objects/Weapons';
+import Shields from '../Objects/Shields';
+import Player from '../Objects/Player';
+import Enemies from '../Objects/Enemies';
 
-var Weapons = require("../Objects/Weapons");
-var Shields = require("../Objects/Shields");
-var Player = require("../Objects/Player");
-var Enemies = require("../Objects/Enemies");
-
-var cachedPlayer = clone(Player);
-var cachedEnemies = clone(Enemies);
+const cachedPlayer = clone(Player);
+const cachedEnemies = clone(Enemies);
 
 function getDevToolsState() {
   return {};
 }
 
-var DevTools = React.createClass({
-  getInitialState: function() {
+const DevTools = React.createClass({
+  getInitialState() {
     return getDevToolsState();
   },
 
-  componentDidMount: function() {
-    document.addEventListener("keydown", this._onKeyDown);
+  componentDidMount() {
+    document.addEventListener('keydown', this._onKeyDown);
   },
 
-  render: function() {
+  render() {
     return (
       <div id="DevTools">
       <button onClick={this._reset}>Reset</button>
@@ -40,35 +35,37 @@ var DevTools = React.createClass({
         Weapons: Weapons,
         Shields: Shields,
         Player: Player,
-        Enemies: Enemies
+        Enemies: Enemies,
       }} onEdit={this._onEdit}/>
       </div>
     );
   },
-  _onKeyDown: function(e) {
-    switch(e.which) {
+  _onKeyDown(e) {
+    switch (e.which) {
       case 82:
         this._reset();
         break;
       case 80:
         this._pause();
         break;
+      default:
+        break;
     }
   },
 
-  _reset: function() {
-    var state = Player.state;
+  _reset() {
+    const state = Player.state;
     this._resetObj(Player, cachedPlayer);
     this._resetObj(Enemies, cachedEnemies);
-    if(state === 'dead') {
+    if (state === 'dead') {
       ObjectStore.load(Player);
       ObjectStore.load(Enemies);
     }
   },
 
-  _resetObj: function(toReset, model) {
-    for(var prop in model) {
-      if(typeof model[prop] === "object") {
+  _resetObj(toReset, model) {
+    for (const prop in model) {
+      if (typeof model[prop] === 'object') {
         this._resetObj(toReset[prop], model[prop]);
         continue;
       }
@@ -76,16 +73,16 @@ var DevTools = React.createClass({
     }
   },
 
-  _pause: function() {
+  _pause() {
     AnimationStore.toggle();
   },
 
-  _onEdit: function() {
+  _onEdit() {
     localStorage.Weapons = JSON.stringify(Weapons);
     localStorage.Shields = JSON.stringify(Shields);
     localStorage.Player = JSON.stringify(Player);
     localStorage.Enemies = JSON.stringify(Enemies);
-  }
+  },
 });
 
 module.exports = DevTools;

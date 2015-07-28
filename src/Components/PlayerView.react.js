@@ -1,99 +1,94 @@
-/** @jsx React.DOM */
-
-"use strict";
-var React = require("react");
+import React from 'react';
 
 // PlayerView store contains all the data and logic for the PlayerView
-var ObjectStore = require('../Stores/ObjectStore');
-var MessageStore = require("../Stores/MessageStore");
-var SoundStore = require("../Stores/SoundStore");
-var AnimationStore = require("../Stores/AnimationStore");
+import ObjectStore from '../Stores/ObjectStore';
+// import MessageStore from '../Stores/MessageStore';
+// import SoundStore from '../Stores/SoundStore';
+import AnimationStore from '../Stores/AnimationStore';
 
-var ObjectActions = require("../Actions/ObjectActions");
-var MessageActions = require("../Actions/MessageActions");
+import ObjectActions from '../Actions/ObjectActions';
+import MessageActions from '../Actions/MessageActions';
 
-var Message = require("./Message.react");
-var DevTools = require("./DevTools.react");
+// import Message from 'Message.react';
+// import DevTools from 'DevTools.react';
 
-var clone = require("clone");
-
-var ATTACK = 13;
-var BLOCK = 32;
-var DOGE = 16;
+const ATTACK = 13;
+const BLOCK = 32;
+const DOGE = 16;
 
 function getColor(n) {
-  var r = 255 - ~~(n/6000 * 255);
-  var g = ~~(n/6000 * 255);
-  var b = (~~(n/6000 * 255) - 200);
-  if(b < 0) {
+  const r = 255 - ~~(n / 6000 * 255);
+  const g = ~~(n / 6000 * 255);
+  let b = (~~(n / 6000 * 255) - 200);
+  if (b < 0) {
     b = 0;
   }
-  var strR = r.toString(16);
-  var strG = g.toString(16);
-  var strB = b.toString(16);
-  if(r < 16) {
-    strR = "0" + strR;
+  let strR = r.toString(16);
+  let strG = g.toString(16);
+  let strB = b.toString(16);
+  if (r < 16) {
+    strR = '0' + strR;
   }
 
-  if(g < 16) {
-    strG = "0" + strG;
+  if (g < 16) {
+    strG = '0' + strG;
   }
 
-  if(b < 16) {
-    strB = "0" + strB;
+  if (b < 16) {
+    strB = '0' + strB;
   }
-  var color = "#" + strR + strG + strB;
+  const color = '#' + strR + strG + strB;
   return color;
 }
 
 
-ObjectStore.load(require("../Objects/Player"));
-ObjectStore.load(require("../Objects/Enemies").simple);
+ObjectStore.load(require('../Objects/Player'));
+ObjectStore.load(require('../Objects/Enemies').simple);
 
 function getViewState() {
   return {
     enemy: ObjectStore.getEnemy(),
-    player: ObjectStore.getPlayer()
-  }
+    player: ObjectStore.getPlayer(),
+  };
 }
 
-var PlayerView = React.createClass({
-  getInitialState: function() {
+const PlayerView = React.createClass({
+  getInitialState() {
     return getViewState();
   },
 
-  componentWillUnmount: function() {
+  componentWillUnmount() {
     ObjectStore.removeListener('change', this._onChange);
   },
 
-  componentDidMount: function() {
-    AnimationStore.on("update", this._onChange);
+  componentDidMount() {
+    AnimationStore.on('update', this._onChange);
     ObjectStore.on('change', this._onChange);
-    document.addEventListener("keyup", this._onKeyUp);
-    document.addEventListener("mousemove", this._onMouseMove);
+    document.addEventListener('keyup', this._onKeyUp);
+    document.addEventListener('mousemove', this._onMouseMove);
 
-    MessageActions.sendMessage("Keybindings: ");
-    MessageActions.sendMessage("enter: attack");
-    MessageActions.sendMessage("space: block");
-    MessageActions.sendMessage("shift: doge");
+    MessageActions.sendMessage('Keybindings: ');
+    MessageActions.sendMessage('enter: attack');
+    MessageActions.sendMessage('space: block');
+    MessageActions.sendMessage('shift: doge');
   },
 
-  // equal: function(obj1, obj2) {
+  // equal(obj1, obj2) {
   //   // return JSON.stringify(obj1) === JSON.stringify(obj2);
   //   return false;
   // },
 
-  // shouldComponentUpdate: function(nextProps, nextState) {
+  // shouldComponentUpdate(nextProps, nextState) {
   //   return !this.equal(nextProps, this.props) || !this.equal(nextState, this.state);
   // },
 
-  render: function() {
-    var player = this.state.player;
-    var enemy = this.state.enemy;
+  render() {
+    const player = this.state.player;
+    const enemy = this.state.enemy;
 
-    var circleRadius = enemy.state === "attacking" ? enemy.currentAnimationTime : 0;
+    const circleRadius = enemy.state === 'attacking' ? enemy.currentAnimationTime : 0;
 
-    var translate =  "translate(-" + (~~((player.currentAnimationTime - 1)/1000) * player.animations[player.state].width) + "px, 0px)";
+    const translate = `translate(-${(~~((player.currentAnimationTime - 1) / 1000) * player.animations[player.state].width)}px, 0px)`;
 
     return (
       <div id="PlayerView">
@@ -111,14 +106,14 @@ var PlayerView = React.createClass({
         <div style={{
           width: player.animations[player.state].width,
           height: player.animations[player.state].height,
-          overflow: "hidden",
-          position: "absolute",
+          overflow: 'hidden',
+          position: 'absolute',
           left: 400,
-          top: 0
+          top: 0,
         }} >
           <img src={player.animations[player.state].url} style={{
             transform: translate,
-            WebkitTransform: translate
+            WebkitTransform: translate,
           }} />
         </div>
         <br />
@@ -130,7 +125,7 @@ var PlayerView = React.createClass({
             height: circleRadius / 50,
             left: 200 - circleRadius / 100,
             top: 270 - circleRadius / 100,
-            background: getColor(circleRadius)
+            background: getColor(circleRadius),
           }}>
           <span>{~~(circleRadius / 1000)}</span>
           </div>
@@ -148,22 +143,22 @@ var PlayerView = React.createClass({
     );
   },
 
-  _onHover: function(e) {
+  _onHover() {
 
   },
 
-  _onMouseMove: function(e) {
+  _onMouseMove() {
     // goal.top = e.x;
     // goal.left = e.y;
   },
 
-  _onChange: function() {
+  _onChange() {
     this.setState(getViewState());
   },
 
-  _onKeyDown: function(e) {
-    document.removeEventListener("keydown", this._onKeyDown);
-    switch(e.which) {
+  _onKeyDown(e) {
+    document.removeEventListener('keydown', this._onKeyDown);
+    switch (e.which) {
       case ATTACK:
         ObjectActions.playerAttack(this.state.player, this.state.enemy);
         break;
@@ -173,12 +168,14 @@ var PlayerView = React.createClass({
       case DOGE:
         ObjectActions.playerDodge(this.state.player);
         break;
+      default:
+        break;
     }
   },
 
-  _onKeyUp: function(e) {
-    document.addEventListener("keydown", this._onKeyDown);
-    switch(e.which) {
+  _onKeyUp(e) {
+    document.addEventListener('keydown', this._onKeyDown);
+    switch (e.which) {
       case ATTACK:
         break;
       case BLOCK:
@@ -186,8 +183,10 @@ var PlayerView = React.createClass({
         break;
       case DOGE:
         break;
+      default:
+        break;
     }
-  }
+  },
 });
 
 
